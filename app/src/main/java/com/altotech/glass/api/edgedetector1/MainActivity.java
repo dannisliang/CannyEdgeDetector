@@ -12,14 +12,18 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
 
     // Used to load the 'native-lib' library on application startup.
     private static String TAG = "MainActivity";
+    private double seconds;
     JavaCameraView javaCameraView;
     Mat mRgba, imgGray, imgCanny;
     BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -108,7 +112,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         Imgproc.cvtColor(mRgba,imgGray,Imgproc.COLOR_RGB2GRAY);
+        long t1 = Core.getTickCount();
         Imgproc.Canny(imgGray,imgCanny,50,150);
+        long t2 = Core.getTickCount();
+        seconds = (t2-t1)/Core.getTickFrequency();
+        Double framePerSec = 1/seconds;
+        Imgproc.putText(imgCanny,framePerSec.intValue()+" fps",new Point(100,100),Core.FONT_HERSHEY_COMPLEX,1.0,new Scalar(173,255,47));
         return imgCanny;
     }
 }
